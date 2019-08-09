@@ -46,9 +46,6 @@
 #include "ble_types.h"
 #include "ble_ranges.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @addtogroup BLE_GATT_DEFINES Defines
  * @{ */
@@ -62,12 +59,6 @@ extern "C" {
 
 /**@brief Invalid Attribute Handle. */
 #define BLE_GATT_HANDLE_INVALID            0x0000
-
-/**@brief First Attribute Handle. */
-#define BLE_GATT_HANDLE_START              0x0001
-
-/**@brief Last Attribute Handle. */
-#define BLE_GATT_HANDLE_END                0xFFFF
 
 /** @defgroup BLE_GATT_TIMEOUT_SOURCES GATT Timeout sources
  * @{ */
@@ -199,9 +190,6 @@ typedef struct
   uint8_t wr_aux          :1; /**< Writing the Characteristic User Description descriptor permitted. */
 } ble_gatt_char_ext_props_t;
 
-#ifdef __cplusplus
-}
-#endif
 #endif // BLE_GATT_H__
 
 /** @} */

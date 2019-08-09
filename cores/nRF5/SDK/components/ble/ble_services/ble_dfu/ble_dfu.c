@@ -316,7 +316,7 @@ static uint32_t on_ctrl_pt_write(ble_dfu_t * p_dfu, ble_gatts_evt_write_t * p_bl
                                              (ble_dfu_procedure_t) p_ble_write_evt->data[0],
                                              BLE_DFU_RESP_VAL_OPER_FAILED);
             }
-
+            
             ble_dfu_evt.evt.ble_dfu_pkt_write.len    = 1;
             ble_dfu_evt.evt.ble_dfu_pkt_write.p_data = &(p_ble_write_evt->data[1]);
 
@@ -403,7 +403,7 @@ static void on_rw_authorize_req(ble_dfu_t * p_dfu, ble_evt_t * p_ble_evt)
         (p_authorize_request->type == BLE_GATTS_AUTHORIZE_TYPE_WRITE)
         &&
         (p_authorize_request->request.write.handle == p_dfu->dfu_ctrl_pt_handles.value_handle)
-        &&
+        && 
         (p_ble_evt->evt.gatts_evt.params.authorize_request.request.write.op != BLE_GATTS_OP_PREP_WRITE_REQ)
         &&
         (p_ble_evt->evt.gatts_evt.params.authorize_request.request.write.op != BLE_GATTS_OP_EXEC_WRITE_REQ_NOW)

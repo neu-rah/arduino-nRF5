@@ -1,31 +1,22 @@
 /* Linker script to configure memory regions. */
+
 SEARCH_DIR(.)
 GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00035000, LENGTH = 44K
-  RAM (rwx) : ORIGIN = 0x20002000, LENGTH = 8K
-  BOOTLOADER_SETTINGS (rw) : ORIGIN = 0x0003FC00, LENGTH = 1K
-
+  FLASH (rx) : ORIGIN = 0x18000, LENGTH = 0x28000
+  RAM (rwx) :  ORIGIN = 0x20002000, LENGTH = 0x2000
 }
+
 SECTIONS
 {
-  /* placing my named section at given address: */
-  .bootloaderSettings 0x0003FC00 :
+  .fs_data_out ALIGN(4):
   {
-
-  }
-	.uicrBootStartAddress 0x10001014 :
-	{
-
-  }
-  /* other placements follow here... */
+    PROVIDE( __start_fs_data = .);
+    KEEP(*(fs_data))
+    PROVIDE( __stop_fs_data = .);
+  } = 0
 }
-/*
-.bootloaderSettings (NOLOAD):
-{
-  *(.bootloaderSettings)
-} > BOOTLOADER_SETTINGS
-*/
-INCLUDE "gcc_nrf51_common.ld"
+
+INCLUDE "nrf5x_common.ld"

@@ -15,9 +15,8 @@
 #include <dfu_types.h>
 #include <stddef.h>
 #include <string.h>
-// #include "boards.h"
-#include "pins_arduino.h"
-#include "nrf51.h"
+#include "boards.h"
+#include "nrf.h"
 #include "nrf_sdm.h"
 #include "nrf_gpio.h"
 #include "app_util.h"
@@ -39,7 +38,7 @@
 #include "nrf_delay.h"
 
 #define DFU_REV_MAJOR                        0x00                                                    /** DFU Major revision number to be exposed. */
-#define DFU_REV_MINOR                        0x06                                                    /** DFU Minor revision number to be exposed. */
+#define DFU_REV_MINOR                        0x08                                                    /** DFU Minor revision number to be exposed. */
 #define DFU_REVISION                         ((DFU_REV_MAJOR << 8) | DFU_REV_MINOR)                  /** DFU Revision number to be exposed. Combined of major and minor versions. */
 #define ADVERTISING_LED_PIN_NO               BSP_LED_0                                               /**< Is on when device is advertising. */
 #define CONNECTED_LED_PIN_NO                 BSP_LED_1                                               /**< Is on when device has connected. */
@@ -63,8 +62,8 @@
 #define APP_ADV_INTERVAL                     MSEC_TO_UNITS(25, UNIT_0_625_MS)                        /**< The advertising interval (25 ms.). */
 #define APP_ADV_TIMEOUT_IN_SECONDS           BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED                   /**< The advertising timeout in units of seconds. This is set to @ref BLE_GAP_ADV_TIMEOUT_GENERAL_UNLIMITED so that the advertisement is done as long as there there is a call to @ref dfu_transport_close function.*/
 #define APP_DIRECTED_ADV_TIMEOUT             50                                                       /**< number of direct advertisement (each lasting 1.28seconds). */
-#define PEER_ADDRESS_TYPE_INVALID            0xFF                                                    /**< Value indicating that no valid peer address exists. This will be the case when a private resolvable address is used in which case there is no address available but instead an IRK is present. */
-#define PEER_ADDRESS_TYPE_INVALID            0xFF                                                    /**< Value indicating that no valid peer address exists. This will be the case when a private resolvable address is used in which case there is no address available but instead an IRK is present. */
+#define PEER_ADDRESS_TYPE_INVALID            0xFF                                                    /**< Value indicating that no valid peer address exists. This will be the case when a private resolvable address is used in which case there is no address available but instead an IRK is present. */   
+#define PEER_ADDRESS_TYPE_INVALID            0xFF                                                    /**< Value indicating that no valid peer address exists. This will be the case when a private resolvable address is used in which case there is no address available but instead an IRK is present. */   
 
 #define SEC_PARAM_TIMEOUT                    30                                                      /**< Timeout for Pairing Request or Security Request (in seconds). */
 #define SEC_PARAM_BOND                       0                                                       /**< Perform bonding. */
@@ -108,7 +107,7 @@ static bool                 m_tear_down_in_progress  = false;                   
 static bool                 m_pkt_rcpt_notif_enabled = false;                                        /**< Variable to denote whether packet receipt notification has been enabled by the DFU controller.*/
 static uint16_t             m_conn_handle            = BLE_CONN_HANDLE_INVALID;                      /**< Handle of the current connection. */
 static bool                 m_is_advertising         = false;                                        /**< Variable to indicate if advertising is ongoing.*/
-__attribute__((section(".noinit"))) static dfu_ble_peer_data_t  m_ble_peer_data;                                                         /**< BLE Peer data exchanged from application on buttonless update mode. */
+static dfu_ble_peer_data_t  m_ble_peer_data;                                                         /**< BLE Peer data exchanged from application on buttonless update mode. */
 static bool                 m_ble_peer_data_valid    = false;                                        /**< True if BLE Peer data has been exchanged from application. */
 static uint32_t             m_direct_adv_cnt         = APP_DIRECTED_ADV_TIMEOUT;                     /**< Counter of direct advertisements. */
 static uint8_t            * mp_final_packet;                                                         /**< Pointer to final data packet received. When callback for succesful packet handling is received from dfu bank handling a transfer complete response can be sent to peer. */
@@ -372,7 +371,7 @@ static void init_data_process(ble_dfu_t * p_dfu, ble_dfu_evt_t * p_evt)
         {
             p_evt->evt.ble_dfu_pkt_write.p_data[pkt_length++] = 0;
         }
-
+        
         p_evt->evt.ble_dfu_pkt_write.len = pkt_length;
     }
 
@@ -424,6 +423,7 @@ static void app_data_process(ble_dfu_t * p_dfu, ble_dfu_evt_t * p_evt)
     }
 
     uint8_t * p_data_packet = p_evt->evt.ble_dfu_pkt_write.p_data;
+    
     memcpy(mp_rx_buffer, p_data_packet, length);
 
     err_code = hci_mem_pool_rx_data_size_set(length);
@@ -787,13 +787,13 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             {
                 uint8_t  sys_attr[128];
                 uint16_t sys_attr_len = 128;
-
+            
                 m_direct_adv_cnt = APP_DIRECTED_ADV_TIMEOUT;
                 nrf_gpio_pin_set(CONNECTED_LED_PIN_NO);
-
-                err_code = sd_ble_gatts_sys_attr_get(m_conn_handle,
-                                                     sys_attr,
-                                                     &sys_attr_len,
+        
+                err_code = sd_ble_gatts_sys_attr_get(m_conn_handle, 
+                                                     sys_attr, 
+                                                     &sys_attr_len, 
                                                      BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS);
                 APP_ERROR_CHECK(err_code);
 
@@ -896,7 +896,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
                 ble_gap_enc_info_t * p_enc_info = NULL;
 
                 // If there is a match in diversifier then set the correct keys.
-                if (p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.ediv ==
+                if (p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.ediv == 
                     m_ble_peer_data.enc_key.master_id.ediv)
                 {
                     p_enc_info = &m_ble_peer_data.enc_key.enc_info;
