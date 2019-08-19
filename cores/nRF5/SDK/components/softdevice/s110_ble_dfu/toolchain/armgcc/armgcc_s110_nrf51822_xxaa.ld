@@ -5,7 +5,7 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x18000, LENGTH = 0x28000
+  FLASH (rx) : ORIGIN = 0x18000, LENGTH = 0x48000
   RAM (rwx) :  ORIGIN = 0x20002000, LENGTH = 0x2000
 }
 
@@ -19,4 +19,4 @@ SECTIONS
   } = 0
 }
 
-INCLUDE "nrf5x_common.ld"
+INCLUDE "gcc_nrf5x_common.ld"
